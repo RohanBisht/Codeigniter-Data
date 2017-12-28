@@ -1,0 +1,70 @@
+public function insertUploadedData(){
+		 $filename=$_FILES["userfile"]["tmp_name"];
+		if($_FILES["userfile"]["size"] > 0)
+		{
+			$file=$_FILES["userfile"]["tmp_name"];
+				$objPHPExcel = PHPExcel_IOFactory::load($file);
+				$data_sheet = $objPHPExcel->getActiveSheet();
+				$orderData = $data_sheet->toArray();
+				$count_data_array = count($orderData);
+				$i = 1;
+				$error_log = array();
+				for($m = 0; $m < $count_data_array; $m++)
+				{
+					 $order_id = "ORD".rand();
+		 			$tracking_id = "DB".rand()."LL";
+					$count_column = count($orderData[$m]);
+					if($i == 1){
+						$i++;
+						continue;
+					}
+					$order_data = array(
+						'order_id' => $order_id,
+						'tracking_id' => $tracking_id,
+						'receiver_name' => trim($orderData[$m][0]),
+						'receiver_mobile' => trim($orderData[$m][1]),
+						'receiver_email' => trim($orderData[$m][2]),
+						'postal_code' => trim($orderData[$m][3]),
+						'address_one' => trim($orderData[$m][4]),
+						'address_two' => trim($orderData[$m][5]),
+						'unit_number' => trim($orderData[$m][6]),
+						'country' => trim($orderData[$m][7]),
+						'status' => 'Unallocated',
+						'added_by' => $this->session->userdata['logged_in']['admin_id']
+					);
+					$orderId = $this->Order_db->insertData('tbl_order_details',$order_data);
+					if($orderId){
+						for($a = 8; $a < $count_column; ){
+							$count = $a + 4;
+							$op_decl = array();
+							$k = 1;
+							for($b = $a; $b < $count; $b++){
+								$op_decl['order_id'] =  $order_id; 
+								if($k == 1){
+									$op_decl['item_name'] =  trim($orderData[$m][$b]);
+								}elseif($k == 2){
+									$op_decl['item_quantity'] =  trim($orderData[$m][$b]);
+								}elseif($k == 3){
+									$op_decl['item_weight'] =  trim($orderData[$m][$b]);
+								}elseif($k == 4){
+									$op_decl['item_price'] =  trim($orderData[$m][$b]);
+									//$op_decl["added_by"] = $this->session->userdata['admin_id'];
+								}
+								
+								$k++;
+								$a++;
+							}
+							if($op_decl['item_name'] != "" || $op_decl['item_quantity'] != ""  || $op_decl['item_weight'] != "" || $op_decl['item_price'] != "" ){
+								
+								$this->Order_db->insertData('tbl_ordered_item_details',$op_decl);
+							} 
+							   
+						}
+			}
+		}
+		echo "<h4 style='color: green'><b>Data Uploaded Successfully</b></h4>";
+	}
+	else{
+		echo "<h4 style='color: red'><b>Something Went Wrong ! Please Try to upload Again</b></h4>";
+	}
+  }
