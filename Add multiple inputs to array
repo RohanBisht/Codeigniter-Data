@@ -1,0 +1,23 @@
+/****** Form ******/
+
+<form method="post" action="<?php echo site_url() ?>basecontroller/formvalues"> 
+		<input type="text" name="textbox1" value="Textbox One">
+		<input type="text" name="textbox2" value="Textbox Two">
+		<input type="text" name="textbox3" value="Textbox Three">
+		<input type="text" name="textbox4" value="Textbox Four">
+		<input type="text" name="textbox5" value="Textbox Five">
+		<input type="text" name="textbox6" value="Textbox Six">
+		<button class="btn btn-primary" type="submit">Submit</button>
+	</form>
+  
+/******* Controller Function ******/
+public function formvalues() {
+		echo "<pre>";
+		print_r($this->input->post());
+		$inputs = $this->input->post();
+		foreach ($inputs as $key => $value) {
+			$data = array(''.$key.'' => $value); // Putting input names in array keys 
+			echo "<pre>";
+			print_r($data);
+		}
+	}
