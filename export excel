@@ -1,0 +1,22 @@
+public function export_excel(){
+					$filename = "orderList.xls";    /** Excel Sheet Name **/   
+					header("Content-Type: application/vnd.ms-excel");
+					header("Content-Disposition: attachment; filename=\"$filename\"");
+					$listProducts = $this->Order_db->getcsvRecords(); /** Fetching Data from model **/
+					$this->ExportFile($listProducts);
+					exit();
+	}
+	
+	function ExportFile($records) {
+		$heading = false;
+		if(!empty($records))
+		  foreach($records as $row) {
+			if(!$heading) {
+			  // display field/column names as a first row
+			  echo implode("\t", array_keys($row)) . "\n";
+			  $heading = true;
+			}
+			echo implode("\t", array_values($row)) . "\n";
+		  }
+		exit;
+	}
