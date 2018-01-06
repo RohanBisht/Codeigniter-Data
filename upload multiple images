@@ -1,0 +1,67 @@
+private function set_upload_options()
+	{   
+    //upload an image options
+    $config = array();
+    $config['upload_path']   = './uploads/';
+    $config['allowed_types'] = 'gif|jpg|png';
+    $config['max_size']      = '0';
+    $config['overwrite']     = FALSE;
+    return $config;
+	}
+
+	public function addseries(){
+		 	$this->load->library('upload');
+    		$dataInfo = array();
+    		$files = $_FILES;
+    		$series_name 	= $this->input->post('series_name');
+			$series_id   	= $this->input->post('series_id');
+			$old_image		= $this->input->post('new_image');
+			$cpt = count($_FILES['userfile']['name']);
+			if (!empty($series_name)) {
+				for($i=0; $i<$cpt; $i++)
+    			{           
+        $_FILES['userfile']['name']= $files['userfile']['name'][$i];
+        $_FILES['userfile']['type']= $files['userfile']['type'][$i];
+        $_FILES['userfile']['tmp_name']= $files['userfile']['tmp_name'][$i];
+        $_FILES['userfile']['error']= $files['userfile']['error'][$i];
+        $_FILES['userfile']['size']= $files['userfile']['size'][$i];    
+
+        $this->upload->initialize($this->set_upload_options());
+        $this->upload->do_upload();
+        $dataInfo[] = $this->upload->data();
+        $data = array('series_name' => $series_name[$i],
+        			  'series_image'=> $dataInfo[$i]['orig_name'],
+					   'added_by' => $this->session->userdata['user_logged_in']['admin_id']
+					 );
+        if (!empty($series_id)) {
+        	if (!empty($old_image)) {
+        		 $data = array('series_name' => $series_name[$i],
+        			  'series_image'=> $old_image,
+					   'added_by' => $this->session->userdata['user_logged_in']['admin_id']
+					 );
+        	}
+					$where = array('series_id' => $series_id);
+					$result = $this->App_model->update('tbl_series',$data,$where);
+				} else {
+					/***** New Code *****/
+					$search_series_array = array('series_name' => $series_name[$i]);
+					$search_result = $this->App_model->getRowById('tbl_series',$search_series_array);
+					if(empty($search_result))
+					{
+						$result = $this->App_model->insert('tbl_series',$data);
+					}
+					else
+					{
+						echo "<h4 style='color: red'><b>Series ".$series_name[$i]." Already Present ..Try To Add New Series</b></h4>"; 
+					}
+					/***** New Code Ends *****/
+					//$result = $this->App_model->insert('tbl_series',$data);
+				}
+    			}
+    			if (!empty($result)) {
+					echo "<h4 style='color: green'><b>Series Added Successfully</b></h4>";
+					} 
+			} else {
+				echo "<b>Please Fill the details </b>";
+			}
+	}
