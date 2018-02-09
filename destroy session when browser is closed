@@ -1,0 +1,4 @@
+/*** Config.php ***/
+
+$config['sess_expiration'] = 0; // default is 7200
+$config['sess_expire_on_close'] = TRUE;
